@@ -48,11 +48,120 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     }
   }
 
+  Future<void> _deleteTask() async {
+    try {
+      final response = await http.delete(
+        Uri.parse('http://10.0.2.2:3000/api/task/delete/${widget.taskId}'),
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pop(context); // Quay lại màn hình trước đó
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Không thể xóa task: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi xóa task: $e')),
+      );
+    }
+  }
+
+  void _showEditDialog() {
+    // Mở dialog để chỉnh sửa task
+    showDialog(
+      context: context,
+      builder: (context) {
+        String updatedName = taskData?['name'] ?? '';
+        String updatedDescription = taskData?['description'] ?? '';
+
+        return AlertDialog(
+          title: Text('Chỉnh sửa Task'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(labelText: 'Tên Task'),
+                controller: TextEditingController(text: updatedName),
+                onChanged: (value) => updatedName = value,
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Mô tả Task'),
+                controller: TextEditingController(text: updatedDescription),
+                onChanged: (value) => updatedDescription = value,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                try {
+                  final response = await http.put(
+                    Uri.parse('http://10.0.2.2:3000/api/task/${widget.taskId}'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: jsonEncode({
+                      'name': updatedName,
+                      'description': updatedDescription,
+                    }),
+                  );
+
+                  if (response.statusCode == 200) {
+                    setState(() {
+                      taskData?['name'] = updatedName;
+                      taskData?['description'] = updatedDescription;
+                    });
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Không thể chỉnh sửa task: ${response.statusCode}')),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Lỗi khi chỉnh sửa task: $e')),
+                  );
+                }
+              },
+              child: Text('Lưu'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Hủy'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(taskData?['name'] ?? 'Chi tiết Task'),
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert),
+            onSelected: (value) {
+              if (value == 'edit') {
+                _showEditDialog();
+              } else if (value == 'delete') {
+                _deleteTask();
+              }
+            },
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Text('Chỉnh sửa'),
+              ),
+              PopupMenuItem(
+                value: 'delete',
+                child: Text('Xóa'),
+              ),
+            ],
+          ),
+        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())

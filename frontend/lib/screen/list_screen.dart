@@ -62,13 +62,12 @@ class _ListScreenState extends State<ListScreen> {
           } else {
             var lists = snapshot.data!;
             return ListView.builder(
-              scrollDirection: Axis.horizontal, // Cuộn ngang
+              scrollDirection: Axis.horizontal,
               itemCount: lists.length,
               itemBuilder: (context, index) {
                 var list = lists[index];
                 return Container(
-                  width: MediaQuery.of(context).size.width *
-                      0.8, // Đặt chiều rộng cho mỗi item
+                  width: MediaQuery.of(context).size.width * 0.8,
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: Card(
                     color: Colors.white,
@@ -125,8 +124,6 @@ class _ListScreenState extends State<ListScreen> {
                             ),
                           ),
                           SizedBox(height: 10),
-                          // Hiển thị các task dưới mỗi list
-
                           FutureBuilder<List<dynamic>>(
                             future: _getTasksForList(list['_id']),
                             builder: (context, taskSnapshot) {
@@ -142,25 +139,19 @@ class _ListScreenState extends State<ListScreen> {
                                 var tasks = taskSnapshot.data!;
                                 return Container(
                                   decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors
-                                            .grey), // Viền khung cho task list
+                                    border: Border.all(color: Colors.grey),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxHeight:
-                                            200.0, // Giới hạn chiều cao tối đa của danh sách
-                                      ),
+                                      constraints:
+                                          BoxConstraints(maxHeight: 200.0),
                                       child: Scrollbar(
-                                        thumbVisibility:
-                                            true, // Hiển thị thanh cuộn
+                                        thumbVisibility: true,
                                         child: ListView.builder(
                                           shrinkWrap: true,
-                                          physics:
-                                              BouncingScrollPhysics(), // Cảm giác mượt khi cuộn
+                                          physics: BouncingScrollPhysics(),
                                           itemCount: tasks.length,
                                           itemBuilder: (context, taskIndex) {
                                             var task = tasks[taskIndex];
@@ -181,7 +172,7 @@ class _ListScreenState extends State<ListScreen> {
                                                       builder: (context) =>
                                                           TaskDetailScreen(
                                                               taskId:
-                                                                  task['_id'] ),
+                                                                  task['_id']),
                                                     ),
                                                   );
                                                 } catch (e) {
@@ -203,8 +194,6 @@ class _ListScreenState extends State<ListScreen> {
                               }
                             },
                           ),
-
-                          // Nút thêm task
                           IconButton(
                             icon: Icon(Icons.add),
                             onPressed: () {
@@ -220,6 +209,11 @@ class _ListScreenState extends State<ListScreen> {
             );
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showAddListDialog,
+        child: Icon(Icons.add),
+        backgroundColor: Colors.blueAccent,
       ),
     );
   }
